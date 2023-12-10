@@ -8,10 +8,41 @@ PIPES = {
     "-": ("L", "R"),
     "|": ("D", "U")
 }
+EMPTY = "."
+OUTSIDE = "O"
 data_list = []
 active_paths = []
 path_length = 0
 
+
+def pprint(list):
+    print()
+    for row in list:
+        disp = ""
+        for char in row:
+            disp += char
+        print(disp)
+
+
+def fill_outer_cells(x, y):
+    data_list[y][x] = OUTSIDE
+    if y > 0 and data_list[y-1][x] == EMPTY:
+        fill_outer_cells(x, y-1)
+    if x < len(data_list[0]) - 1 and data_list[y][x+1] == EMPTY:
+        fill_outer_cells(x+1, y)
+    if y < len(data_list) - 1 and data_list[y+1][x] == EMPTY:
+        fill_outer_cells(x, y+1)
+    if x > 0 and data_list[y][x-1] == EMPTY:
+        fill_outer_cells(x-1, y)
+
+
+def count_empties():
+    empties = 0
+    for row in data_list:
+        for char in row:
+            if char == EMPTY:
+                empties += 1
+    return empties
 
 
 def find_start():
@@ -45,10 +76,9 @@ def next_step():
     path_length += 1
 
 
-
 if __name__ == '__main__':
     if DEBUG:
-        file = "data/example3.txt"
+        file = "data/example2.txt"
     else:
         file = "data/puzzle.txt"
     with open(file, "r") as f:
@@ -82,5 +112,8 @@ if __name__ == '__main__':
     #     # time.sleep(.5)
     # print(active_paths, path_length)
     data_list[start[0]][start[1]] = start_shape
+    fill_outer_cells(0,0)
+    pprint(data_list)
+    print("\nANSWER = ",count_empties())
 
 # Press the green button in the gutter to run the script.
