@@ -1,3 +1,4 @@
+from functools import lru_cache
 DEBUG = False
 Q = "?"
 OPERATIONAL = "."
@@ -19,10 +20,40 @@ def recur_fit(row):
     Q_spot = row[0].find(Q)
     options = [row[0][:Q_spot]+DAMAGED+row[0][Q_spot+1:],
                row[0][:Q_spot]+OPERATIONAL+row[0][Q_spot+1:]]
-    sum = 0
+    answer = 0
     for option in options:
-        sum += recur_fit([option, row[1]])
-    return sum
+        answer += recur_fit([option, row[1]])
+    return answer
+
+
+import re
+import functools as ft
+
+def possible_placements(condition, spring):
+    for m in re.finditer(rf'(?=([^\.]{{{spring}}}[^#]))', condition):
+        i = m.span(1)[0]
+        if '#' in condition[:i]:
+            break
+        yield condition[i + spring + 1:]
+
+@ft.cache
+def count_placements(condition, springs):
+    if not springs:
+        return '#' not in condition
+    first_spring, rest_springs = springs[0], springs[1:]
+    return sum(count_placements(rest_condition, rest_springs)
+                  for rest_condition
+                  in possible_placements(condition, first_spring))
+
+def day12p2():
+    with open(file) as f:
+        lines = [(f'.{"?".join([condition] * 5)}.',
+                  tuple(map(int, springs.split(','))) * 5)
+                 for condition, springs
+                 in (line.strip().split() for line in f)]
+        print(lines)
+    res = sum(count_placements(condition, springs) for condition, springs in lines)
+    print(res)
 
 
 if __name__ == '__main__':
@@ -39,7 +70,10 @@ if __name__ == '__main__':
     print(data_list)
     # print(fit_row(data_list[1]))
     print(recur_fit(data_list[0]))
-    sum = 0
+    answer = 0
     for row in data_list:
-        sum += recur_fit(row)
-    print(sum)
+        answer += recur_fit(row)
+    print(answer)
+    day12p2()
+
+
