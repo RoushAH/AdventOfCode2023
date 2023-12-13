@@ -1,5 +1,8 @@
+from multiprocessing import Pool
+from multiprocessing.dummy import Pool as ThreadPool
+
+DEBUG = True
 from functools import lru_cache
-DEBUG = False
 Q = "?"
 OPERATIONAL = "."
 DAMAGED = "#"
@@ -56,6 +59,27 @@ def day12p2():
     print(res)
 
 
+def recur_fit_dynamic(row):
+    if Q not in row[0]:
+        return fit_row(row)
+    hash_target = sum(row[1])
+    hash_count = row[0].count(DAMAGED)
+    # print(row, hash_target, hash_count)
+    data_split = list(filter(lambda x: len(x)>0, row[0].split(OPERATIONAL)))
+    print(data_split)
+    return 0
+
+def unfold_row(new, short=False):
+    row = new.copy()
+    if short:
+        row[0] = row[0]+Q+row[0]
+        row[1] = row[1] * 2
+        return row
+    row[1] = row[1] * 5
+    row[0] = row[0]+Q+row[0]+Q+row[0]+Q+row[0]+Q+row[0]
+    return row
+
+
 if __name__ == '__main__':
     if DEBUG:
         file = "data/example1.txt"
@@ -67,8 +91,23 @@ if __name__ == '__main__':
     data_list = [x.split(" ") for x in data_string]
     for row in data_list:
         row[1] = tuple(map(int, row[1].split(",")))
-    print(data_list)
+    # print(data_list)
     # print(fit_row(data_list[1]))
+    # print(recur_fit(data_list[0]))
+    answer = 0
+    # for row in data_list:
+    #     sum += recur_fit(row)
+    big_list = [unfold_row(x, True) for x in data_list]
+    old_sum = 0
+    with Pool() as pool:
+        results = pool.imap_unordered(recur_fit_dynamic, data_list)
+        results_old = pool.imap_unordered(recur_fit, data_list)
+        for result in results:
+            answer += result
+            # print(result)
+        for result in results_old:
+            old_sum += result
+    print(answer, old_sum)
     print(recur_fit(data_list[0]))
     answer = 0
     for row in data_list:
