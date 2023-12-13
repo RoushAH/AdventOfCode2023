@@ -2,6 +2,7 @@ from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 
 import functools as ft
+import difflib
 
 DEBUG = True
 HASH = "#"
@@ -26,6 +27,50 @@ def flipperooni(grid):
     # print("\n\n")
     # print("\n".join(flip))
     return flip
+
+
+def find_smudge_stage2(grid, possibles):
+    options = []
+    for a in possibles:
+        row_a = grid[a]
+        # print (a, row_a)
+        for b, row_b in enumerate(grid):
+            diff_count = 0
+            diff_locale = 0
+            diff = difflib.ndiff(row_a, row_b)
+            pos = 0
+            for k, s in enumerate(diff):
+                # print(s[0], row_a[k], row_b[k])
+                if s[0] == '-':
+                    diff_count += 1
+                    diff_locale = pos
+                if diff_count == 2:
+                    break
+                pos += 1
+            if diff_count == 1:
+                # print(row_a, row_b, diff_locale)
+                options.append((a, b, diff_locale))
+            # print(a, b, row_a, row_b, diff_count)
+    return options
+    pass
+
+
+def find_smudge_stage1(grid):
+    counts = []
+    for row in grid:
+        counts.append(row.count(HASH))
+    # print(counts)
+    possible_rows = set()
+    for x, count_a in enumerate(counts):
+        for count_b in counts:
+            if count_a == count_b - 1:
+                possible_rows.add(x)
+    # print(possible_rows)
+    # for a in grid:
+    #     for b in grid:
+    #         diff = difflib.ndiff(a, b)
+    #         print(diff.__next__(), a, b)
+    return possible_rows
 
 
 def find_matches(grid):
@@ -99,5 +144,7 @@ if __name__ == '__main__':
             f_grid = flipperooni(grid)
             answer += test_matches(f_grid, find_matches(f_grid), False) or 0
             # input()
-        find_smudge(grid)
+        possibles = find_smudge_stage1(data_list[1])
+        print(find_smudge_stage2(grid, possibles))
     print(answer)
+
