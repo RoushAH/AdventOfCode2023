@@ -182,7 +182,9 @@ if __name__ == '__main__':
             grid_val_2, f_hits = make_and_test_options(f_grid, options)
             print(grid_val_2, f_hits, hits)
             pprint(f_grid)
+            print("Flipped")
             pprint(grid)
+            print("Regular")
             answer2 += grid_val_2
 
     print(answer)
