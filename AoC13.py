@@ -64,18 +64,23 @@ def find_smudge_stage2(grid, possibles):
         row_b = grid[b]
         diff_count = 0
         diff_locale = 0
-        diff = difflib.ndiff(row_a, row_b)
+        # diff = difflib.ndiff(row_a, row_b)
         pos = 0
-        for k, s in enumerate(diff):
-            # print(s[0], row_a[k], row_b[k])
-            if s[0] == '-':
-                diff_count += 1
-                diff_locale = pos
-            if diff_count == 2:
-                break
-            pos += 1
+        diffs = ( row_a[i] != row_b[i] for i in range(len(row_a))  )
+        diff_count = sum( diffs )
+        # for k, s in enumerate(diff):
+        #     # print(s[0], row_a[k], row_b[k])
+        #     if s[0] == '-':
+        #         diff_count += 1
+        #         diff_locale = pos
+        #     if diff_count == 2:
+        #         break
+        #     pos += 1
         if diff_count == 1 and (a + b) % 2 == 1 :
             # print(row_a, row_b, diff_locale)
+            for i in range(len(row_a)):
+                if row_a[i] != row_b[i]:
+                    diff_locale = i
             options.append((a, b, diff_locale))
         # print(a, b, row_a, row_b, diff_count)
     return options
@@ -177,14 +182,15 @@ if __name__ == '__main__':
         if grid_val_2 is not None:
             answer2 += 100 * grid_val_2
         else:
-            possibles = find_smudge_stage1(f_grid)
-            options = find_smudge_stage2(f_grid, possibles)
-            grid_val_2, f_hits = make_and_test_options(f_grid, options)
+            f_grid = flipperooni(grid)
+            f_possibles = find_smudge_stage1(f_grid)
+            f_options = find_smudge_stage2(f_grid, f_possibles)
+            grid_val_2, f_hits = make_and_test_options(f_grid, f_options)
             print(grid_val_2, f_hits, hits)
-            pprint(f_grid)
-            print("Flipped")
             pprint(grid)
             print("Regular")
+            pprint(f_grid)
+            print("Flipped")
             answer2 += grid_val_2
 
     print(answer)
